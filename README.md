@@ -7,7 +7,7 @@ A comprehensive dataset of Bitcoin-related news articles and market sentiment in
 This repository contains:
 - **Hourly Bitcoin news articles** from May-June 2025
 - **Bitcoin Fear & Greed Index** historical data
-- News data sourced from major cryptocurrency publications via CoinDesk and Finnhub APIs
+- News data sourced from major Bitcoin publications via CoinDesk and Finnhub APIs
 - Structured CSV format for easy analysis and research
 
 ## Data Structure
@@ -101,13 +101,12 @@ print(f"API sources: {all_news['api_source'].value_counts()}")
 - All timestamps are in UTC
 - Duplicate articles have been filtered
 - URLs are validated and accessible
-- Categories are standardized across sources
 - Missing data is clearly marked
 
 ## Limitations
 - Data collection limited to English-language sources
 - Some sources may have rate limiting affecting completeness
-- Sentiment analysis included (updated every two weeks)
+- Sentiment analysis included, but updated once every two weeks
 - No price data included (this repo focuses on news and sentiment only), if you need price dataset, check this repo: https://github.com/mouadja02/bitcoin-hourly-ohclv-dataset.git
 
 ## License
