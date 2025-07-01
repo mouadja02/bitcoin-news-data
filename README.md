@@ -17,6 +17,7 @@ This repository contains:
 DDMMYYYY/
 ├── bitcoin_news_YYYY-MM-DD_HH-00.csv
 XX052025.zip (May 2025 complete dataset - compressed)
+XX062025.zip (June 2025 complete dataset - compressed)
 ```
 
 Each hourly news file contains:
@@ -53,7 +54,8 @@ Each hourly news file contains:
 
 ### Archive Structure
 - `XX052025.zip`: Complete May 2025 dataset (compressed for storage efficiency)
-- Individual daily folders for June 2025 (uncompressed for easy access)
+- `XX062025.zip`: Complete June 2025 dataset (compressed for storage efficiency)
+- Individual daily folders for July 2025 (uncompressed for easy access)
 
 ## Getting Started
 
@@ -69,8 +71,8 @@ import pandas as pd
 import glob
 import zipfile
 
-# Extract May data if needed
-with zipfile.ZipFile('XX052025.zip', 'r') as zip_ref:
+# Extract a compressed data if needed
+with zipfile.ZipFile('XX052025.zip', 'r') as zip_ref: 
     zip_ref.extractall('may_2025_data/')
 
 # Load all news data (June)
