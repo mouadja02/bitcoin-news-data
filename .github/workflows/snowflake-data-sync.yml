@@ -18,6 +18,10 @@ on:
         - daily
         - all
 
+# Add this permissions block
+permissions:
+  contents: write
+
 jobs:
   download-hourly:
     if: github.event.schedule == '30 * * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'hourly' || github.event.inputs.table_type == 'all')
@@ -26,6 +30,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -61,6 +67,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Set up Python
       uses: actions/setup-python@v4
