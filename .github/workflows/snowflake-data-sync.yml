@@ -61,7 +61,7 @@ jobs:
         git push
 
   download-daily:
-    if: github.event.schedule == '30 0 * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'daily' || github.event.inputs.table_type == 'all')
+    if: github.event.schedule == '45 23 * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'daily' || github.event.inputs.table_type == 'all')
     runs-on: ubuntu-latest
     
     steps:
