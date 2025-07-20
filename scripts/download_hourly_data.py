@@ -17,7 +17,7 @@ def download_hourly_fng():
         
         # Download HOURLY_FNG table
         print("Downloading BTC_DATA.ANALYTICS.HOURLY_FNG...")
-        cursor.execute("SELECT * FROM BTC_DATA.ANALYTICS.HOURLY_FNG ORDER BY DATETIME_HOUR ASC")
+        cursor.execute("SELECT DATETIME_HOUR,AVG_SENTIMENT_SCORE,FEAR_GREED_SCORE,FEAR_GREED_CATEGORY,TOTAL_ARTICLES,PROCESSING_TIMESTAMP FROM BTC_DATA.ANALYTICS.HOURLY_FNG ORDER BY DATETIME_HOUR ASC")
         df_hourly = cursor.fetch_pandas_all()
         
         # Ensure data directory exists
