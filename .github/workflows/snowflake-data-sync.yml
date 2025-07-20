@@ -5,7 +5,7 @@ on:
     # Hourly FNG data - every hour at 30 minutes past
     - cron: '30 * * * *'
     # Daily data - every day at 11:40 PM UTC+2
-    - cron: '53 21 * * *'
+    - cron: '40 21 * * *'
   workflow_dispatch:
     inputs:
       table_type:
@@ -65,7 +65,7 @@ jobs:
         fi
 
   download-daily:
-    if: github.event.schedule == '53 21 * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'daily' || github.event.inputs.table_type == 'all')
+    if: github.event.schedule == '40 21 * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'daily' || github.event.inputs.table_type == 'all')
     runs-on: ubuntu-latest
     
     steps:
