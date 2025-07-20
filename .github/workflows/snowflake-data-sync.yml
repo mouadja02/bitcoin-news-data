@@ -34,7 +34,8 @@ jobs:
         
     - name: Install dependencies
       run: |
-        pip install snowflake-connector-python pandas
+        pip install --upgrade pip
+        pip install "snowflake-connector-python[pandas]" pandas pyarrow
         
     - name: Download hourly FNG data
       env:
@@ -68,7 +69,8 @@ jobs:
         
     - name: Install dependencies
       run: |
-        pip install snowflake-connector-python pandas
+        pip install --upgrade pip
+        pip install "snowflake-connector-python[pandas]" pandas pyarrow
         
     - name: Download daily data
       env:
