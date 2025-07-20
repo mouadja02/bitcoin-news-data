@@ -16,7 +16,7 @@ def download_daily_data():
         cursor = conn.cursor()
         
         # Ensure data directory exists
-        os.makedirs('data', exist_ok=True)
+        os.makedirs('datasets', exist_ok=True)
         
         # Download NEWS table
         print("Downloading BTC_DATA.RAW.BITCOIN_NEWS...")
