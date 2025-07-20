@@ -19,17 +19,17 @@ def download_daily_data():
         os.makedirs('data', exist_ok=True)
         
         # Download NEWS table
-        print("Downloading BTC_DATA.RAW.NEWS...")
-        cursor.execute("SELECT * FROM BTC_DATA.RAW.NEWS ORDER BY published_date DESC")
+        print("Downloading BTC_DATA.RAW.BITCOIN_NEWS...")
+        cursor.execute("SELECT * FROM BTC_DATA.RAW.BITCOIN_NEWS ORDER BY DATETIME DESC")
         df_news = cursor.fetch_pandas_all()
-        df_news.to_csv('data/news.csv', index=False)
+        df_news.to_csv('datasets/news.csv', index=False)
         print(f"Saved news data: {len(df_news)} rows")
         
         # Download DAILY_FNG table
         print("Downloading BTC_DATA.ANALYTICS.DAILY_FNG...")
-        cursor.execute("SELECT * FROM BTC_DATA.ANALYTICS.DAILY_FNG ORDER BY date DESC")
+        cursor.execute("SELECT * FROM BTC_DATA.ANALYTICS.DAILY_FNG ORDER BY ANALYSIS_DATE DESC")
         df_daily_fng = cursor.fetch_pandas_all()
-        df_daily_fng.to_csv('data/daily_fng.csv', index=False)
+        df_daily_fng.to_csv('datasets/daily_fng.csv', index=False)
         print(f"Saved daily FNG data: {len(df_daily_fng)} rows")
         
     except Exception as e:
