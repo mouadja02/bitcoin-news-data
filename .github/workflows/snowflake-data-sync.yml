@@ -5,7 +5,7 @@ on:
     # Hourly FNG data - every hour at 30 minutes past
     - cron: '30 * * * *'
     # Daily data - every day at 11:45 PM UTC
-    - cron: '45 23 * * *'
+    - cron: '45 21 * * * UTC'
   workflow_dispatch:
     inputs:
       table_type:
