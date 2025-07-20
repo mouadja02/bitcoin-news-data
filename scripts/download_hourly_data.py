@@ -21,10 +21,10 @@ def download_hourly_fng():
         df_hourly = cursor.fetch_pandas_all()
         
         # Ensure data directory exists
-        os.makedirs('data', exist_ok=True)
+        os.makedirs('datasets', exist_ok=True)
         
         # Save to CSV
-        df_hourly.to_csv('data/hourly_fng.csv', index=False)
+        df_hourly.to_csv('datasets/hourly_fng.csv', index=False)
         print(f"Saved hourly FNG data: {len(df_hourly)} rows")
         
     except Exception as e:
