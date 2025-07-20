@@ -20,14 +20,14 @@ def download_daily_data():
         
         # Download NEWS table
         print("Downloading BTC_DATA.RAW.BITCOIN_NEWS...")
-        cursor.execute("SELECT * FROM BTC_DATA.RAW.BITCOIN_NEWS ORDER BY DATETIME ASC")
+        cursor.execute("SELECT DATETIME,HEADLINE,SUMMARY,SOURCE,URL,CATEGORIES,TAGS FROM BTC_DATA.RAW.BITCOIN_NEWS ORDER BY DATETIME ASC")
         df_news = cursor.fetch_pandas_all()
         df_news.to_csv('datasets/news.csv', index=False)
         print(f"Saved news data: {len(df_news)} rows")
         
         # Download DAILY_FNG table
         print("Downloading BTC_DATA.ANALYTICS.DAILY_FNG...")
-        cursor.execute("SELECT * FROM BTC_DATA.ANALYTICS.DAILY_FNG ORDER BY ANALYSIS_DATE ASC")
+        cursor.execute("SELECT ANALYSIS_DATE,DAILY_FEAR_GREED_SCORE,FEAR_GREED_CATEGORY,TOTAL_ARTICLES,HOURLY_SCORES,PROCESSING_TIMESTAMP FROM BTC_DATA.ANALYTICS.DAILY_FNG ORDER BY ANALYSIS_DATE ASC")
         df_daily_fng = cursor.fetch_pandas_all()
         df_daily_fng.to_csv('datasets/daily_fng.csv', index=False)
         print(f"Saved daily FNG data: {len(df_daily_fng)} rows")
