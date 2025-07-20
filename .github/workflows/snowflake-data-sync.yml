@@ -1,0 +1,88 @@
+name: Snowflake Data Sync
+
+on:
+  schedule:
+    # Hourly FNG data - every hour at 30 minutes past
+    - cron: '30 * * * *'
+    # Daily data - every day at 12:30 AM UTC
+    - cron: '30 0 * * *'
+  workflow_dispatch:
+    inputs:
+      table_type:
+        description: 'Which tables to download'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - hourly
+        - daily
+        - all
+
+jobs:
+  download-hourly:
+    if: github.event.schedule == '30 * * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'hourly' || github.event.inputs.table_type == 'all')
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install snowflake-connector-python pandas
+        
+    - name: Download hourly FNG data
+      env:
+        SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+        SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+        SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      run: |
+        python scripts/download_hourly_data.py
+        
+    - name: Commit and push hourly data
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/hourly_fng.csv
+        git diff --staged --quiet || git commit -m "Update hourly FNG data - $(date -u)"
+        git push
+
+  download-daily:
+    if: github.event.schedule == '30 0 * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'daily' || github.event.inputs.table_type == 'all')
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install snowflake-connector-python pandas
+        
+    - name: Download daily data
+      env:
+        SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+        SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+        SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      run: |
+        python scripts/download_daily_data.py
+        
+    - name: Commit and push daily data
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/news.csv data/daily_fng.csv
+        git diff --staged --quiet || git commit -m "Update daily data (news & daily FNG) - $(date -u)"
+        git push
