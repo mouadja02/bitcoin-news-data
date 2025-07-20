@@ -4,8 +4,8 @@ on:
   schedule:
     # Hourly FNG data - every hour at 30 minutes past
     - cron: '30 * * * *'
-    # Daily data - every day at 12:30 AM UTC
-    - cron: '30 0 * * *'
+    # Daily data - every day at 11:45 PM UTC
+    - cron: '45 23 * *'
   workflow_dispatch:
     inputs:
       table_type:
