@@ -20,7 +20,7 @@ def download_daily_data():
         
         # Download NEWS table
         print("Downloading BTC_DATA.RAW.BITCOIN_NEWS...")
-        cursor.execute("SELECT DATETIME,HEADLINE,SUMMARY,SOURCE,URL,CATEGORIES,TAGS FROM BTC_DATA.RAW.BITCOIN_NEWS ORDER BY DATETIME ASC")
+        cursor.execute("SELECT * FROM ( SELECT DATETIME,HEADLINE,SUMMARY,SOURCE,URL,CATEGORIES,TAGS FROM BTC_DATA.RAW.BITCOIN_NEWS ORDER BY DATETIME DESC LIMIT 34000) ORDER BY DATETIME ASC")
         df_news = cursor.fetch_pandas_all()
         df_news.to_csv('datasets/news.csv', index=False)
         print(f"Saved news data: {len(df_news)} rows")
