@@ -1,10 +1,10 @@
 name: Snowflake Data Sync
 on:
-  schedule:
+  #schedule:
     # Hourly FNG data - every hour at 30 minutes past
-    - cron: '30 * * * *'
+    #- cron: '30 * * * *'
     # Daily data - every day at 9:40 PM UTC (11:40 PM UTC+2)
-    - cron: '40 21 * * *'
+    #- cron: '40 21 * * *'
   workflow_dispatch:
     inputs:
       table_type:
@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   download-hourly:
-    if: github.event.schedule == '30 * * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'hourly' || github.event.inputs.table_type == 'all')
+    # if: github.event.schedule == '30 * * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'hourly' || github.event.inputs.table_type == 'all')
     runs-on: ubuntu-latest
     
     steps:
@@ -64,7 +64,7 @@ jobs:
         fi
 
   download-daily:
-    if: github.event.schedule == '40 21 * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'daily' || github.event.inputs.table_type == 'all')
+    # if: github.event.schedule == '40 21 * * *' || github.event_name == 'workflow_dispatch' && (github.event.inputs.table_type == 'daily' || github.event.inputs.table_type == 'all')
     runs-on: ubuntu-latest
     
     steps:
