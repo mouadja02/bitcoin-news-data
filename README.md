@@ -1,88 +1,128 @@
-# Bitcoin News Data Collection
+# Bitcoin News Dataset
 
-A comprehensive dataset of Bitcoin-related news articles and market sentiment indicators, featuring Fear & Greed Index calculations based on sentiment analysis of Bitcoin news coverage.
+A comprehensive dataset of Bitcoin-related news articles collected from multiple sources, stored in Apache Parquet format for efficient analysis.
 
 ## Dataset Overview
 
-This repository contains:
-- **Bitcoin news articles** with comprehensive metadata
-- **Daily Fear & Greed Index** with aggregated sentiment scores
-- **Hourly Fear & Greed Index** with detailed temporal analysis
-- Data sourced from major Bitcoin publications and processed through advanced sentiment analysis
-- Structured CSV format optimized for analysis and research
+This repository contains a continuously-updated dataset of Bitcoin news articles with metadata including publication timestamps, headlines, summaries, source information, and categorization. Data is sourced from The Guardian, Finnhub, and AlphaVantage APIs.
+
+## How the Dataset is Built
+
+This dataset is automatically generated and published by an [Airflow DAG](https://github.com/mouadja02/airflow-self-hosted) running on a self-hosted Raspberry Pi. The pipeline:
+
+1. **Collects news** from three sources daily:
+   - **The Guardian API** — Historical backfill (from 2014) + daily delta
+   - **Finnhub API** — Daily crypto news
+   - **AlphaVantage NEWS_SENTIMENT** — Daily sentiment-tagged news
+2. **Deduplicates** articles by URL and merges into a Snowflake data warehouse
+3. **Exports** the full table as a Parquet file and pushes to this repo via Git LFS
+
+The DAG runs daily at 01:00 UTC. Each run fetches new articles from all three sources and re-exports the complete dataset.
 
 ## Repository Structure
 
 ```
 bitcoin-news-data/
-├── datasets/
-│   ├── news.csv              # Complete Bitcoin news dataset
-│   ├── daily_fng.csv         # Daily Fear & Greed Index aggregations
-│   └── hourly_fng.csv        # Hourly Fear & Greed Index calculations
+├── bitcoin-news.parquet      # Complete dataset — Parquet format (Git LFS)
+├── bitcoin-news.tsv          # Complete dataset — TSV format (Git LFS)
 ├── scripts/
-│   ├── download_daily_data.py    # Script to download news and daily FNG data
-│   └── download_hourly_data.py   # Script to download hourly FNG data
+│   ├── bitcoin_news_dag.py       # Reference copy of the Airflow DAG
+│   ├── download_daily_data.py    # Utility to download from Snowflake
+│   └── download_hourly_data.py   # Utility to download hourly FNG data
+├── LICENSE
 └── README.md
 ```
 
-## Data Structure
+## Data Schema
 
-### News Data (`news.csv`)
-Contains comprehensive Bitcoin news articles with the following fields:
-- `DATETIME`: Publication timestamp (ISO format)
-- `HEADLINE`: Article title
-- `SUMMARY`: Article summary/excerpt  
-- `SOURCE`: Publication source
-- `URL`: Direct link to the article
-- `CATEGORIES`: Topic categories (comma-separated)
-- `TAGS`: Relevant tags and metadata
+The `bitcoin-news.parquet` file contains the following columns:
 
-### Daily Fear & Greed Index (`daily_fng.csv`)
-Daily aggregated sentiment analysis with:
-- `ANALYSIS_DATE`: Date of analysis (YYYY-MM-DD)
-- `DAILY_FEAR_GREED_SCORE`: Aggregated daily score (0-100)
-- `FEAR_GREED_CATEGORY`: Classification (Fear, Neutral, Greed, Extreme Greed)
-- `TOTAL_ARTICLES`: Number of articles analyzed for that day
-- `HOURLY_SCORES`: JSON array of hourly scores throughout the day
-- `PROCESSING_TIMESTAMP`: Data processing timestamp
+| Column | Type | Description |
+|--------|------|-------------|
+| `DATETIME` | timestamp | Publication timestamp |
+| `HEADLINE` | string | Article title |
+| `SUMMARY` | string | Article summary/excerpt |
+| `SOURCE` | string | Publication source (The Guardian, Finnhub, etc.) |
+| `URL` | string | Direct link to the article |
+| `CATEGORIES` | string | Topic categories |
+| `TAGS` | string | Relevant tags and metadata |
+| `API_SOURCE` | string | Which API provided the article (`guardian`, `finnhub`, `alphavantage`) |
+| `FILE_NAME` | string | Internal batch identifier |
+| `CREATED_AT` | timestamp | When the record was ingested |
 
-### Hourly Fear & Greed Index (`hourly_fng.csv`)
-Detailed hourly sentiment analysis with:
-- `DATETIME_HOUR`: Hour timestamp (YYYY-MM-DD HH:00:00)
-- `AVG_SENTIMENT_SCORE`: Average sentiment score for the hour
-- `FEAR_GREED_SCORE`: Normalized Fear & Greed score (0-100)
-- `FEAR_GREED_CATEGORY`: Hourly classification
-- `TOTAL_ARTICLES`: Number of articles analyzed for that hour
-- `PROCESSING_TIMESTAMP`: Data processing timestamp
+## Why Parquet + TSV?
+
+The dataset is published in two formats:
+
+| Format | File | Best for |
+|--------|------|----------|
+| **Parquet** | `bitcoin-news.parquet` | Python/R analysis, fast columnar reads, type-safe timestamps |
+| **TSV** | `bitcoin-news.tsv` | Universal compatibility, human-readable, shell tools (`cut`, `awk`) |
+
+Why not CSV? Headlines and summaries contain commas, quotes, and HTML fragments that break comma-delimited parsing. TSV (tab-separated) avoids this since tabs almost never appear in news text.
+
+Parquet additionally provides:
+- **50-70% smaller** file size via Snappy compression
+- **Native types** — timestamps stay as timestamps, not strings
+- **Column pruning** — read only the columns you need
+
+## Quick Start
+
+```python
+import pandas as pd
+
+# Load from Parquet (recommended for Python)
+df = pd.read_parquet("bitcoin-news.parquet")
+
+# Or load from TSV
+df = pd.read_csv("bitcoin-news.tsv", sep="\t")
+
+# Filter by source
+guardian = df[df["API_SOURCE"] == "guardian"]
+
+# Get articles from last 30 days
+from datetime import datetime, timedelta
+recent = df[df["DATETIME"] >= datetime.now() - timedelta(days=30)]
+```
+
+```python
+# Using polars (faster for large datasets)
+import polars as pl
+
+df = pl.read_parquet("bitcoin-news.parquet")
+df.filter(pl.col("SOURCE") == "The Guardian").select(["DATETIME", "HEADLINE"])
+```
+
+```bash
+# Shell — quick look at TSV without any code
+head -5 bitcoin-news.tsv | column -t -s $'\t'
+```
+
+## Data Coverage
+
+- **Time Period**: 2014 – Present (continuously updated)
+- **Update Frequency**: Daily (01:00 UTC)
+- **Languages**: English
+- **Sources**: The Guardian, Finnhub, AlphaVantage
 
 ## Use Cases
 
-- **Sentiment Analysis**: Correlate news sentiment with Bitcoin price movements
-- **Market Research**: Analyze Bitcoin news coverage patterns and trends
-- **Academic Research**: Study cryptocurrency media influence on market behavior
-- **Trading Strategy Development**: Incorporate news sentiment into algorithmic trading models
-- **Data Science Projects**: Practice NLP, time series analysis, and sentiment modeling
-- **Financial Analysis**: Research Fear & Greed cycles in cryptocurrency markets
-
-## Data Coverage & Statistics
-
-- **Time Period**: May 2025 - Present (continuously updated)
-- **Total Articles**: 50MB+ of comprehensive Bitcoin news coverage
-- **Update Frequency**: Real-time collection with hourly aggregations
-- **Languages**: English
-- **API Sources**: CoinDesk API, Finnhub API
-
+- Sentiment analysis — correlate news tone with Bitcoin price movements
+- Market research — analyze Bitcoin coverage patterns over time
+- NLP projects — named entity recognition, topic modeling, summarization
+- Trading signals — incorporate news sentiment into algorithmic strategies
+- Academic research — study cryptocurrency media influence on market behavior
 
 ## Limitations
-- Data collection limited to English-language sources
-- Some sources may have rate limiting affecting completeness
-- Sentiment analysis included, but updated once every two weeks
-- No price data included (this repo focuses on news and sentiment only), if you need price dataset, check this repo: https://github.com/mouadja02/bitcoin-hourly-ohclv-dataset.git
+
+- English-language sources only
+- Some API rate limiting may affect completeness on individual days
+- No price data included (news and metadata only) — for price data see [bitcoin-hourly-ohlcv-dataset](https://github.com/mouadja02/bitcoin-hourly-ohclv-dataset)
 
 ## License
 
-This dataset is provided under the MIT License. See LICENSE file for details.
+MIT License. See [LICENSE](LICENSE) for details.
 
-It is provided for research and educational purposes. Please respect the original publishers' terms of service when using the news content.
+This data is for research and educational purposes. Please respect the original publishers' terms of service when using the news content.
 
 **Disclaimer**: This data is for research purposes only. Always verify information from original sources before making financial decisions.
